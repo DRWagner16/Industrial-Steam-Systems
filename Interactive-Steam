@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide to Industrial Steam System Efficiency</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Ethereal Blue & Warm Neutrals -->
+    <!-- Application Structure Plan: The application is designed as a narrative journey for the user, broken into four thematic sections: 1) 'The Steam Cycle' uses an interactive diagram to explain the fundamentals. 2) 'Where Energy is Lost' uses a dashboard with a donut chart and clickable cards to visualize sources of inefficiency. 3) 'Efficiency Solutions' provides a filterable grid of actionable strategies. 4) 'The Business Case' uses key metrics and a comparison chart to highlight the benefits. This structure was chosen to transform a dense report into an engaging, task-oriented exploration, guiding the user from understanding the problem to discovering solutions and their value, which is more effective for learning and retention than a linear text-based layout. -->
+    <!-- Visualization & Content Choices: 1. Steam Cycle (Goal: Organize/Inform) -> Interactive HTML/JS Diagram: A clickable diagram is more engaging than a static list for explaining the four-stage cycle. 2. Energy Losses (Goal: Compare/Inform) -> Chart.js Donut Chart: Visually breaks down the major sources of loss, providing an immediate high-level overview. 3. Efficiency Solutions (Goal: Organize/Compare) -> Filterable HTML Grid: Allows users to actively explore and find solutions relevant to specific areas of a steam system. 4. Business Case (Goal: Compare/Inform) -> Chart.js Bar Chart: A simple before-and-after visualization makes the economic and environmental benefits tangible and easy to grasp. All text is summarized from the source report for clarity and brevity. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #2c3e50;
+        }
+        .nav-active {
+            color: #3B82F6;
+            border-bottom-color: #3B82F6;
+        }
+        .nav-inactive {
+            color: #6B7280;
+            border-bottom-color: transparent;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .modal {
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="app" class="container mx-auto px-4 sm:px-6 lg:px-8">
+
+        <header class="text-center py-12 md:py-16">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 tracking-tight">Optimizing Industrial Steam Systems</h1>
+            <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-600">An interactive guide to understanding the fundamentals, identifying inefficiencies, and implementing solutions for a highly efficient steam system.</p>
+        </header>
+
+        <nav id="navbar" class="sticky top-0 bg-f8f7f4/80 backdrop-blur-sm z-50 border-b border-gray-200 mb-12">
+            <div class="flex justify-center items-center space-x-4 md:space-x-8 py-3 text-sm md:text-base font-medium">
+                <a href="#section-cycle" class="nav-link nav-active py-2 border-b-2 transition-all duration-300">The Steam Cycle</a>
+                <a href="#section-losses" class="nav-link nav-inactive py-2 border-b-2 transition-all duration-300">Energy Losses</a>
+                <a href="#section-solutions" class="nav-link nav-inactive py-2 border-b-2 transition-all duration-300">Efficiency Solutions</a>
+                <a href="#section-business-case" class="nav-link nav-inactive py-2 border-b-2 transition-all duration-300">The Business Case</a>
+            </div>
+        </nav>
+
+        <main>
+            <section id="section-cycle" class="py-16 scroll-mt-24">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-800">The Steam System Cycle</h2>
+                    <p class="mt-2 text-lg text-gray-600 max-w-2xl mx-auto">Industrial steam systems operate on a closed-loop cycle. Click on each stage to learn more about its function and key components.</p>
+                </div>
+
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+                    <div id="cycle-diagram-content" class="md:w-1/2 p-6 bg-white rounded-2xl shadow-lg order-2 md:order-1 min-h-[300px] flex flex-col justify-center">
+                        <h3 id="cycle-title" class="text-2xl font-bold text-blue-600 mb-2">1. Steam Generation</h3>
+                        <p id="cycle-description" class="text-gray-700">This is where the cycle begins. Water is treated and heated in a boiler to produce high-pressure steam. Key components include the boiler itself, feedwater treatment systems to remove impurities, and deaerators to remove corrosive dissolved gases like oxygen.</p>
+                    </div>
+
+                    <div class="md:w-1/2 grid grid-cols-2 gap-4 order-1 md:order-2">
+                        <button data-cycle="generation" class="cycle-btn bg-blue-500 text-white p-4 rounded-xl shadow-md hover:bg-blue-600 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <span class="text-4xl">🏭</span>
+                            <span class="block font-semibold mt-2">1. Generation</span>
+                        </button>
+                        <button data-cycle="distribution" class="cycle-btn bg-white text-gray-700 p-4 rounded-xl shadow-md hover:bg-gray-100 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400">
+                             <span class="text-4xl">➡️</span>
+                            <span class="block font-semibold mt-2">2. Distribution</span>
+                        </button>
+                        <button data-cycle="utilization" class="cycle-btn bg-white text-gray-700 p-4 rounded-xl shadow-md hover:bg-gray-100 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400">
+                             <span class="text-4xl">⚙️</span>
+                            <span class="block font-semibold mt-2">3. Utilization</span>
+                        </button>
+                        <button data-cycle="recovery" class="cycle-btn bg-white text-gray-700 p-4 rounded-xl shadow-md hover:bg-gray-100 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400">
+                             <span class="text-4xl">💧</span>
+                            <span class="block font-semibold mt-2">4. Recovery</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section-losses" class="py-16 bg-gray-50 rounded-2xl scroll-mt-24">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-800">Where is Energy Lost?</h2>
+                    <p class="mt-2 text-lg text-gray-600 max-w-2xl mx-auto">Significant energy losses, often over 20% of the initial energy input, can occur in poorly maintained systems. Explore the primary sources of inefficiency.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="chart-container">
+                        <canvas id="lossChart"></canvas>
+                    </div>
+                    <div class="space-y-4">
+                         <div class="bg-white p-4 rounded-lg shadow cursor-pointer loss-card" data-loss="boiler">
+                            <h3 class="font-semibold text-lg text-red-600">Boiler Inefficiencies</h3>
+                            <p class="text-sm text-gray-600">Improper combustion, heat loss up the stack, and fouled surfaces.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow cursor-pointer loss-card" data-loss="distribution">
+                            <h3 class="font-semibold text-lg text-orange-600">Distribution Losses</h3>
+                            <p class="text-sm text-gray-600">Leaks and uninsulated pipes, valves, and fittings.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow cursor-pointer loss-card" data-loss="traps">
+                            <h3 class="font-semibold text-lg text-yellow-600">Steam Trap Failures</h3>
+                            <p class="text-sm text-gray-600">A major source of loss, with traps failing open and blowing live steam.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow cursor-pointer loss-card" data-loss="recovery">
+                            <h3 class="font-semibold text-lg text-purple-600">Poor Recovery</h3>
+                            <p class="text-sm text-gray-600">Wasting valuable hot condensate and flash steam.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section-solutions" class="py-16 scroll-mt-24">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-800">Efficiency Solutions Explorer</h2>
+                    <p class="mt-2 text-lg text-gray-600 max-w-2xl mx-auto">Discover actionable strategies to improve steam system efficiency. Filter by area to find relevant solutions.</p>
+                </div>
+                
+                <div class="flex justify-center space-x-2 mb-8">
+                    <button class="solution-filter-btn bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium" data-filter="all">All</button>
+                    <button class="solution-filter-btn bg-white text-gray-600 px-4 py-2 rounded-full text-sm font-medium" data-filter="Boiler">Boiler</button>
+                    <button class="solution-filter-btn bg-white text-gray-600 px-4 py-2 rounded-full text-sm font-medium" data-filter="Distribution">Distribution</button>
+                    <button class="solution-filter-btn bg-white text-gray-600 px-4 py-2 rounded-full text-sm font-medium" data-filter="Traps">Steam Traps</button>
+                    <button class="solution-filter-btn bg-white text-gray-600 px-4 py-2 rounded-full text-sm font-medium" data-filter="Recovery">Recovery</button>
+                </div>
+
+                <div id="solutions-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            </section>
+            
+            <section id="section-business-case" class="py-16 bg-gray-800 text-white rounded-2xl scroll-mt-24">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold">The Business Case for Optimization</h2>
+                    <p class="mt-2 text-lg text-gray-300 max-w-2xl mx-auto">Improving efficiency isn't just about saving energy—it's about boosting productivity, reliability, and your bottom line.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-2xl font-bold text-teal-300">Economic Benefits</h3>
+                            <p class="mt-1 text-gray-300">Directly reduce fuel costs, lower maintenance expenses through improved reliability, and increase plant productivity with consistent, high-quality steam.</p>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-teal-300">Environmental Benefits</h3>
+                            <p class="mt-1 text-gray-300">Lowering fuel consumption significantly reduces greenhouse gas emissions (CO2) and other pollutants, helping meet sustainability goals and regulatory requirements.</p>
+                        </div>
+                         <div>
+                            <h3 class="text-2xl font-bold text-teal-300">Productivity & Safety</h3>
+                            <p class="mt-1 text-gray-300">A well-maintained system enhances safety by mitigating risks like water hammer and improves product quality through stable, reliable heating.</p>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="savingsChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center py-8 mt-12 border-t border-gray-200">
+            <p class="text-sm text-gray-500">An Interactive Summary based on "Optimizing Industrial Steam Systems: A Comprehensive Guide."</p>
+        </footer>
+    </div>
+
+    <div id="modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div id="modal-content" class="bg-white rounded-xl shadow-2xl p-6 md:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-300">
+             <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="text-2xl font-bold text-gray-800"></h3>
+                <button id="modal-close-btn" class="text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <div id="modal-body" class="prose max-w-none text-gray-700"></div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const appData = {
+                cycle: {
+                    generation: {
+                        title: '1. Steam Generation',
+                        description: 'This is where the cycle begins. Water is treated and heated in a boiler to produce high-pressure steam. Key components include the boiler itself, feedwater treatment systems to remove impurities, and deaerators to remove corrosive dissolved gases like oxygen.',
+                    },
+                    distribution: {
+                        title: '2. Steam Distribution',
+                        description: 'Once generated, steam is transported through a network of insulated pipes to various points of use. This network includes valves, headers, and fittings to control flow and pressure, ensuring steam reaches its destination efficiently.',
+                    },
+                    utilization: {
+                        title: '3. Steam Utilization',
+                        description: 'At the point of use, steam transfers its energy to processes. This includes heating in heat exchangers, driving turbines for power, or direct injection for sterilization. The quality and pressure of steam are critical here.',
+                    },
+                    recovery: {
+                        title: '4. Condensate Recovery',
+                        description: 'After releasing its heat, steam condenses back into hot water (condensate). Steam traps remove this condensate from the system, which is then returned to the boiler to conserve energy, water, and treatment chemicals.',
+                    }
+                },
+                losses: {
+                    chartData: {
+                        labels: ['Steam Trap Failures', 'Distribution Losses', 'Boiler Inefficiencies', 'Poor Recovery'],
+                        data: [35, 30, 25, 10],
+                    },
+                    content: {
+                        boiler: { title: 'Boiler Inefficiencies', text: 'Losses at the boiler are primarily from heat going up the stack (stack loss), radiation from hot surfaces, and excessive blowdown. Improper air-fuel ratios lead to incomplete combustion, wasting fuel. Soot or scale on heat transfer surfaces acts as an insulator, forcing the boiler to work harder.' },
+                        distribution: { title: 'Distribution Losses', text: 'The distribution network loses energy through uninsulated pipes, valves, and fittings, which radiate heat into the environment. Steam leaks from joints, flanges, and valve stems are a direct and continuous loss of energy, treated water, and money.' },
+                        traps: { title: 'Steam Trap Failures', text: 'Faulty steam traps are a massive source of waste. Traps that fail open allow live steam to continuously blow into the condensate system, potentially losing up to 20% of all steam generated. Traps that fail closed cause condensate to back up, reducing heat transfer and causing dangerous water hammer.' },
+                        recovery: { title: 'Poor Recovery', text: 'Failing to return hot condensate to the boiler means its valuable heat energy is wasted, requiring more fuel to heat new makeup water. Additionally, when high-pressure condensate drops to a lower pressure, it creates "flash steam." Venting this flash steam to the atmosphere is another major energy loss.' }
+                    }
+                },
+                solutions: [
+                    { category: 'Boiler', title: 'Improve Combustion Efficiency', desc: 'Perform regular boiler tune-ups and install O2 trim controls to optimize the air-fuel ratio. This simple step can save 2-5% on fuel.', impact: 'High' },
+                    { category: 'Boiler', title: 'Install an Economizer', desc: 'Recover waste heat from flue gases to preheat boiler feedwater. For every 40°F reduction in stack gas temperature, efficiency increases by about 1%.', impact: 'High' },
+                    { category: 'Boiler', title: 'Manage Boiler Blowdown', desc: 'Use automatic controls and heat recovery units to minimize energy and water loss from necessary boiler blowdown.', impact: 'Medium' },
+                    { category: 'Distribution', title: 'Comprehensive Insulation', desc: 'Insulate all bare steam pipes, valves, and fittings. Use removable jackets for components needing maintenance. This is one of the most cost-effective measures.', impact: 'High' },
+                    { category: 'Distribution', title: 'Proactive Leak Repair', desc: 'Implement a regular ultrasonic leak detection program to find and fix steam leaks. A good program can improve system efficiency by 3-5%.', impact: 'High' },
+                    { category: 'Distribution', title: 'Optimize Steam Pressure', desc: 'Operate the system at the lowest practical pressure that meets process needs. This reduces fuel use and distribution losses.', impact: 'Medium' },
+                    { category: 'Traps', title: 'Steam Trap Management Program', desc: 'Implement regular surveys, testing, and prompt repair/replacement of failed traps. A well-managed program can yield 10-15% energy efficiency gains.', impact: 'Very High' },
+                    { category: 'Traps', title: 'Use IoT Monitoring', desc: 'Deploy wireless sensors for real-time monitoring of steam traps. This provides immediate failure alerts, minimizing steam loss duration and optimizing maintenance.', impact: 'Very High' },
+                    { category: 'Recovery', title: 'Maximize Condensate Return', desc: 'Return all clean, hot condensate to the boiler. This saves energy, treated water, and chemicals.', impact: 'High' },
+                    { category: 'Recovery', title: 'Flash Steam Recovery', desc: 'Install a flash vessel to capture flash steam and use it for low-pressure heating demands, instead of venting it to the atmosphere.', impact: 'High' },
+                    { category: 'Recovery', title: 'Use Backpressure Turbines', desc: 'Where pressure must be reduced, replace Pressure-Reducing Valves (PRVs) with backpressure turbines to generate electricity or mechanical power.', impact: 'Medium' },
+                    { category: 'End-Use', title: 'Match Steam to Process', desc: 'Ensure steam pressure and quality (dryness) are optimized for each specific end-use application to maximize heat transfer efficiency.', impact: 'Medium' }
+                ],
+                savings: {
+                    labels: ['Energy Cost', 'CO2 Emissions'],
+                    base: [100, 100],
+                    optimized: [75, 75]
+                }
+            };
+
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modal-content');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+
+            function showModal(title, bodyHtml) {
+                modalTitle.textContent = title;
+                modalBody.innerHTML = bodyHtml;
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modalContent.classList.remove('scale-95');
+            }
+
+            function hideModal() {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modalContent.classList.add('scale-95');
+            }
+
+            modalCloseBtn.addEventListener('click', hideModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    hideModal();
+                }
+            });
+
+
+            const cycleBtns = document.querySelectorAll('.cycle-btn');
+            const cycleTitle = document.getElementById('cycle-title');
+            const cycleDescription = document.getElementById('cycle-description');
+            cycleBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const cycleKey = btn.dataset.cycle;
+                    cycleTitle.textContent = appData.cycle[cycleKey].title;
+                    cycleDescription.textContent = appData.cycle[cycleKey].description;
+                    
+                    cycleBtns.forEach(b => {
+                        b.classList.remove('bg-blue-500', 'text-white');
+                        b.classList.add('bg-white', 'text-gray-700');
+                    });
+                    btn.classList.add('bg-blue-500', 'text-white');
+                    btn.classList.remove('bg-white', 'text-gray-700');
+                });
+            });
+
+            const lossCards = document.querySelectorAll('.loss-card');
+            lossCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const lossKey = card.dataset.loss;
+                    const lossData = appData.losses.content[lossKey];
+                    showModal(lossData.title, `<p>${lossData.text}</p>`);
+                });
+            });
+
+
+            const lossChartCtx = document.getElementById('lossChart').getContext('2d');
+            new Chart(lossChartCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: appData.losses.chartData.labels,
+                    datasets: [{
+                        label: 'Potential Energy Loss Contribution',
+                        data: appData.losses.chartData.data,
+                        backgroundColor: ['#DC2626', '#EA580C', '#D97706', '#9333EA'],
+                        borderColor: '#F8F7F4',
+                        borderWidth: 4,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#4B5563',
+                                font: { size: 12 }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Primary Sources of Energy Loss',
+                            color: '#1F2937',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed + '% (Potential Impact)';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+
+            const solutionsGrid = document.getElementById('solutions-grid');
+            function renderSolutions(filter = 'all') {
+                solutionsGrid.innerHTML = '';
+                const filteredSolutions = filter === 'all' 
+                    ? appData.solutions 
+                    : appData.solutions.filter(s => s.category === filter || (filter === 'Traps' && s.category === 'Traps'));
+
+                filteredSolutions.forEach(solution => {
+                    const card = document.createElement('div');
+                    card.className = `solution-card bg-white p-6 rounded-xl shadow-lg cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col`;
+                    card.innerHTML = `
+                        <span class="text-xs font-semibold uppercase tracking-wider ${
+                            solution.category === 'Boiler' ? 'text-red-500' :
+                            solution.category === 'Distribution' ? 'text-orange-500' :
+                            solution.category === 'Traps' ? 'text-yellow-500' :
+                            'text-purple-500'
+                        }">${solution.category}</span>
+                        <h4 class="font-bold text-xl mt-1 text-gray-800">${solution.title}</h4>
+                        <p class="text-gray-600 mt-2 text-sm flex-grow">${solution.desc}</p>
+                        <div class="mt-4 pt-4 border-t border-gray-100">
+                             <span class="text-xs font-semibold text-gray-500">Impact: 
+                                <span class="font-bold ${
+                                    solution.impact === 'Very High' ? 'text-green-600' :
+                                    solution.impact === 'High' ? 'text-green-500' :
+                                    'text-yellow-600'
+                                }">${solution.impact}</span>
+                             </span>
+                        </div>
+                    `;
+                    solutionsGrid.appendChild(card);
+                });
+            }
+
+            const filterBtns = document.querySelectorAll('.solution-filter-btn');
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => {
+                        b.classList.remove('bg-blue-500', 'text-white');
+                        b.classList.add('bg-white', 'text-gray-600');
+                    });
+                    btn.classList.add('bg-blue-500', 'text-white');
+                    btn.classList.remove('bg-white', 'text-gray-600');
+                    renderSolutions(btn.dataset.filter);
+                });
+            });
+            renderSolutions();
+
+            const savingsChartCtx = document.getElementById('savingsChart').getContext('2d');
+            new Chart(savingsChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: appData.savings.labels,
+                    datasets: [
+                        {
+                            label: 'Typical System',
+                            data: appData.savings.base,
+                            backgroundColor: '#9CA3AF',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Optimized System',
+                            data: appData.savings.optimized,
+                            backgroundColor: '#10B981',
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                             labels: { color: '#D1D5DB' }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Potential Savings Comparison',
+                            color: '#F9FAFB',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 110,
+                            ticks: { 
+                                callback: value => value + '%',
+                                color: '#D1D5DB'
+                            },
+                            grid: { color: '#4B5563' }
+                        },
+                        x: {
+                            ticks: { color: '#D1D5DB' },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.add('nav-inactive');
+                            link.classList.remove('nav-active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('nav-active');
+                                link.classList.remove('nav-inactive');
+                            }
+                        });
+                    }
+                });
+            }, { rootMargin: "-50% 0px -50% 0px" });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
