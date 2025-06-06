@@ -127,9 +127,18 @@
              <section id="section-components" class="py-16 scroll-mt-24">
                 <div class="text-center mb-12">
                     <h2 class="text-3xl font-bold text-slate-800">Anatomy of a System</h2>
-                    <p class="mt-2 text-lg text-slate-600 max-w-2xl mx-auto">A steam system is a complex network of equipment. Click a component to see its function and impact on efficiency.</p>
-                    <button data-modal-trigger="table-components" class="mt-4 text-blue-600 font-semibold hover:underline">View Full Component Table</button>
+                    <p class="mt-2 text-lg text-slate-600 max-w-2xl mx-auto">A steam system is a complex network of equipment. Click a component to see its function and impact on efficiency, or view the full summary table.</p>
                 </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 text-center">
+                    <button data-modal-trigger="comp-boiler" class="bg-white p-4 rounded-lg border border-slate-200 hover:bg-slate-50 hover:shadow-md transition">Boiler</button>
+                    <button data-modal-trigger="comp-deaerator" class="bg-white p-4 rounded-lg border border-slate-200 hover:bg-slate-50 hover:shadow-md transition">Deaerator</button>
+                    <button data-modal-trigger="comp-steam-trap" class="bg-white p-4 rounded-lg border border-slate-200 hover:bg-slate-50 hover:shadow-md transition">Steam Trap</button>
+                    <button data-modal-trigger="comp-insulation" class="bg-white p-4 rounded-lg border border-slate-200 hover:bg-slate-50 hover:shadow-md transition">Insulation</button>
+                    <button data-modal-trigger="comp-economizer" class="bg-white p-4 rounded-lg border border-slate-200 hover:bg-slate-50 hover:shadow-md transition">Economizer</button>
+                </div>
+                 <div class="text-center mt-8">
+                     <button data-modal-trigger="table-components" class="text-blue-600 font-semibold hover:underline">View Full Component Table</button>
+                 </div>
             </section>
 
             <section id="section-losses" class="py-16 bg-white rounded-2xl scroll-mt-24">
@@ -255,6 +264,13 @@
                     'prop-enthalpy': { title: 'Enthalpy', content: '<div><p>Enthalpy represents the total heat content of steam, comprising two components:</p><ul><li><strong>Sensible Heat:</strong> The energy required to raise the temperature of water to its boiling point.</li><li><strong>Latent Heat of Vaporization:</strong> The energy required to convert water at its boiling point into steam at the same temperature. This latent heat is the primary component of energy transferred in most steam heating processes and can account for over 90% of steam\'s total energy.</li></ul></div>' },
                     'prop-pressure': { title: 'Pressure-Temperature Relationship', content: '<p>For saturated steam, there is a direct and fixed relationship between its pressure and temperature. This is a key operational advantage, allowing for precise temperature control simply by regulating steam pressure. However, operating at pressures higher than necessary wastes energy.</p>' }
                 },
+                components: {
+                    'comp-boiler': { title: 'Component: Boiler', content: '<p><strong>Function:</strong> Converts water to steam by transferring heat from fuel. <strong>Efficiency Impact:</strong> Its performance is central to the entire system. Key factors include combustion efficiency, heat transfer surface cleanliness, blowdown rate, and operating pressure. Inefficiencies lead directly to higher fuel consumption.</p>' },
+                    'comp-deaerator': { title: 'Component: Deaerator', content: '<p><strong>Function:</strong> Removes dissolved gases (O2, CO2) from feedwater and preheats it. <strong>Efficiency Impact:</strong> Crucial for preventing corrosion, which degrades heat transfer surfaces and damages equipment. Efficient deaeration protects system integrity and maintains performance.</p>' },
+                    'comp-steam-trap': { title: 'Component: Steam Trap', content: '<p><strong>Function:</strong> Removes condensate and air from steam systems while preventing live steam loss. <strong>Efficiency Impact:</strong> Critical. Failed-open traps are a massive source of direct energy loss. Failed-closed traps reduce heating capacity and can cause dangerous water hammer.</p>' },
+                    'comp-insulation': { title: 'Component: Insulation', content: '<p><strong>Function:</strong> Minimizes heat loss from hot surfaces (pipes, valves, boilers). <strong>Efficiency Impact:</strong> Directly reduces fuel consumption by preventing thermal energy from escaping to the environment. Damaged or missing insulation is one of the most significant and common sources of inefficiency.</p>' },
+                    'comp-economizer': { title: 'Component: Economizer', content: '<p><strong>Function:</strong> A heat exchanger that recovers waste heat from boiler flue gases to preheat feedwater. <strong>Efficiency Impact:</strong> Directly increases boiler efficiency by reducing the amount of fuel required to turn feedwater into steam. A very effective capital improvement.</p>' }
+                },
                 tables: {
                     'table-components': {
                         title: 'Table 1: Key System Components',
@@ -360,7 +376,7 @@
             document.querySelectorAll('[data-modal-trigger]').forEach(trigger => {
                 trigger.addEventListener('click', () => {
                     const targetId = trigger.dataset.modalTrigger;
-                    const data = appData.properties[targetId] || appData.tables[targetId];
+                    const data = appData.properties[targetId] || appData.tables[targetId] || appData.components[targetId];
                     if (data) {
                         showModal(data.title, data.content);
                     }
